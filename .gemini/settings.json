@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "bg": {
+      "command": "bg-mcp"
+    }
+  }
+}

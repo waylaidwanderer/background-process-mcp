@@ -1,0 +1,51 @@
+{
+  "name": "@waylaidwanderer/bg-mcp",
+  "version": "1.0.0",
+  "description": "A robust, decoupled system for managing background shell processes via MCP and a TUI.",
+  "main": "dist/cli.js",
+  "bin": {
+    "bg-mcp": "dist/cli.js"
+  },
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "tsc",
+    "start:server": "tsx src/server.ts",
+    "start:tui": "tsx src/tui.ts",
+    "start:mcp": "tsx src/mcp.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.16.1",
+  "imports": {
+    "es-toolkit/compat": "es-toolkit/compat/index.js"
+  },
+  "dependencies": {
+    "@inkjs/ui": "^2.0.0",
+    "fastmcp": "^3.17.0",
+    "ink": "^6.3.1",
+    "minimist": "^1.2.8",
+    "node-pty": "^1.0.0",
+    "portfinder": "^1.0.38",
+    "react": "^19.1.1",
+    "string-width": "^8.1.0",
+    "strip-ansi": "^7.1.2",
+    "tree-kill": "^1.2.2",
+    "uuid": "^13.0.0",
+    "ws": "^8.18.3",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/minimist": "^1.2.5",
+    "@types/node": "^24.5.2",
+    "@types/react": "^19.1.13",
+    "@types/uuid": "^11.0.0",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

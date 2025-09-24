@@ -1,0 +1,16 @@
+# Dependencies
+/node_modules
+
+# Build output
+/dist
+
+# Local plans
+/plans
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS-specific
+.DS_Store
+Thumbs.db
