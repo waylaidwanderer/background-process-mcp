@@ -1,5 +1,11 @@
 # @waylaidwanderer/background-process-mcp
 
+## 1.0.2
+
+### Patch Changes
+
+- Add repository link to package.json
+
 ## 1.0.1
 
 ### Patch Changes

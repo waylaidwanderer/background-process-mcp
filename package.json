@@ -1,6 +1,6 @@
 {
   "name": "@waylaidwanderer/background-process-mcp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "index.js",
   "type": "module",
@@ -29,6 +29,10 @@
   ],
   "author": "Joel (waylaidwanderer)",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/waylaidwanderer/background-process-mcp.git"
+  },
   "publishConfig": {
     "access": "public"
   },
