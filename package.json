@@ -19,9 +19,19 @@
     "release": "pnpm build && changeset publish",
     "lint": "eslint . --fix"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "mcp",
+    "background-process",
+    "process-manager",
+    "llm",
+    "ai-agent",
+    "tui"
+  ],
+  "author": "Joel (waylaidwanderer)",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "packageManager": "pnpm@10.16.1",
   "imports": {
     "es-toolkit/compat": "es-toolkit/compat/index.js"
