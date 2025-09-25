@@ -14,15 +14,26 @@ import type { ProcessManagerEvents } from './ProcessManager.js';
 import type { ProcessState, ServerMessage } from '../types/index.js';
 
 const OUTPUT_BATCH_INTERVAL_MS = 50;
+const HEARTBEAT_INTERVAL_MS = 15 * 1000; // 15 seconds
+const IDLE_SHUTDOWN_TIMEOUT_MS = 30 * 1000; // 30 seconds
+
+// Extend the WebSocket type to include our custom property
+interface ExtendedWebSocket extends WebSocket {
+    isAlive: boolean;
+}
 
 class WebSocketServer {
-    private wss: Server;
+    public wss: Server;
 
     private processManager: ProcessManager;
 
     private outputBuffers = new Map<string, string>();
 
     private packageVersion = 'unknown';
+
+    private heartbeatInterval: NodeJS.Timeout | null = null;
+
+    private shutdownTimeout: NodeJS.Timeout | null = null;
 
     public constructor(port: number) {
         this.wss = new Server({ port });
@@ -53,10 +64,26 @@ class WebSocketServer {
         this.processManager = new ProcessManager(events);
         this.setupConnectionHandler();
         this.loadPackageVersion();
+        this.setupHeartbeat();
         setInterval(
             () => this.flushAllOutputBuffers(),
             OUTPUT_BATCH_INTERVAL_MS,
         );
+
+        const cleanupAndExit = this.shutdown.bind(this);
+        process.on('SIGINT', cleanupAndExit);
+        process.on('SIGTERM', cleanupAndExit);
+    }
+
+    public async shutdown(): Promise<void> {
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+        }
+        this.cancelShutdownTimer();
+        this.wss.close();
+        await ProcessManager.globalCleanup();
+        // eslint-disable-next-line n/no-process-exit
+        process.exit(0);
     }
 
     private async loadPackageVersion(): Promise<void> {
@@ -80,13 +107,59 @@ class WebSocketServer {
     }
 
     private setupConnectionHandler(): void {
-        this.wss.on('connection', (ws) => {
+        this.wss.on('connection', (ws: ExtendedWebSocket) => {
+            this.cancelShutdownTimer();
+
+            ws.isAlive = true;
+            ws.on('pong', () => {
+                ws.isAlive = true;
+            });
+
             this.sendFullState(ws);
 
             ws.on('message', (message) => {
                 this.handleMessage(ws, message);
             });
+
+            ws.on('close', () => {
+                this.checkIdle();
+            });
         });
+    }
+
+    private setupHeartbeat(): void {
+        this.heartbeatInterval = setInterval(() => {
+            this.wss.clients.forEach((ws) => {
+                const extWs = ws as ExtendedWebSocket;
+                if (!extWs.isAlive) {
+                    extWs.terminate();
+                    return;
+                }
+                extWs.isAlive = false;
+                extWs.ping();
+            });
+        }, HEARTBEAT_INTERVAL_MS);
+    }
+
+    private checkIdle(): void {
+        if (this.wss.clients.size === 0) {
+            this.startShutdownTimer();
+        }
+    }
+
+    private startShutdownTimer(): void {
+        if (this.shutdownTimeout) return;
+        this.shutdownTimeout = setTimeout(
+            () => this.shutdown(),
+            IDLE_SHUTDOWN_TIMEOUT_MS,
+        );
+    }
+
+    private cancelShutdownTimer(): void {
+        if (this.shutdownTimeout) {
+            clearTimeout(this.shutdownTimeout);
+            this.shutdownTimeout = null;
+        }
     }
 
     private handleMessage(ws: WebSocket, message: RawData): void {
@@ -223,6 +296,8 @@ class WebSocketServer {
             this.flushOutputBuffer(processId);
         });
     }
+
+
 
     public broadcast(message: ServerMessage): void {
         const serializedMessage = JSON.stringify(message);

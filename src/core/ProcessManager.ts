@@ -39,24 +39,14 @@ export class ProcessManager {
 
     public constructor(events: ProcessManagerEvents) {
         this.events = events;
-        // If this is the first instance, attach the global handlers.
-        if (ProcessManager.instances.size === 0) {
-            process.on('SIGINT', ProcessManager.cleanupAndExit);
-            process.on('SIGTERM', ProcessManager.cleanupAndExit);
-        }
         ProcessManager.instances.add(this);
     }
 
     public destroy(): void {
         ProcessManager.instances.delete(this);
-        // If this was the last instance, remove the global handlers.
-        if (ProcessManager.instances.size === 0) {
-            process.removeListener('SIGINT', ProcessManager.cleanupAndExit);
-            process.removeListener('SIGTERM', ProcessManager.cleanupAndExit);
-        }
     }
 
-    private static async globalCleanup(): Promise<void> {
+    public static async globalCleanup(): Promise<void> {
         const allInstances = Array.from(ProcessManager.instances);
         const killPromises = allInstances.flatMap((instance) => instance.getAllKillPromises());
 
@@ -75,11 +65,6 @@ export class ProcessManager {
 
         await Promise.all(killPromises);
         clearTimeout(timeout);
-    }
-
-    private static async cleanupAndExit(): Promise<void> {
-        await ProcessManager.globalCleanup();
-        throw new Error('Cleanup and exit.');
     }
 
     public getAllKillPromises(): Promise<void>[] {
