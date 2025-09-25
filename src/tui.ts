@@ -1,22 +1,57 @@
 import React from 'react';
 
 import { render } from 'ink';
+import WebSocket from 'ws';
 
 import App from './tui/App.js';
 
 function getServerUrl(): string {
     const port = process.env.BG_MCP_PORT;
     if (!port) {
-        throw new Error(
+        // This error is for developers, should be seen.
+        // eslint-disable-next-line no-console
+        console.error(
             'Error: Port not provided. This module should be launched via the CLI.',
         );
+        process.exit(1);
     }
     return `ws://localhost:${port}`;
 }
 
-export default function runTUI(): void {
+/**
+ * Performs a pre-flight check to ensure the server is available.
+ * @param url The WebSocket server URL.
+ */
+async function preflightCheck(url: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const ws = new WebSocket(url);
+
+        const onError = (err: Error): void => {
+            ws.close();
+            reject(err);
+        };
+
+        ws.once('open', () => {
+            ws.close(); // We don't need this connection, it was just a check.
+            resolve();
+        });
+
+        ws.once('error', onError);
+    });
+}
+
+export default async function runTUI(): Promise<void> {
     const serverUrl = getServerUrl();
     const isDebugMode = process.env.BG_MCP_DEBUG === 'true';
+
+    try {
+        await preflightCheck(serverUrl);
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        // eslint-disable-next-line no-console
+        console.error(`Failed to connect to Core Service: ${errorMessage}`);
+        process.exit(1);
+    }
 
     const enterAltScreen = (): void => {
         process.stdout.write('\x1b[?1049h\x1b[2J\x1b[H');
@@ -43,7 +78,9 @@ export default function runTUI(): void {
 
     enterAltScreen();
 
-    const app = render(React.createElement(App, { serverUrl, isDebugMode }));
+    const app = render(
+        React.createElement(App, { serverUrl, isDebugMode }),
+    );
 
     app
         .waitUntilExit()
