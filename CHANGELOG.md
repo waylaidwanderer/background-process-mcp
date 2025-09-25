@@ -1,5 +1,11 @@
 # @waylaidwanderer/background-process-mcp
 
+## 1.0.3
+
+### Patch Changes
+
+- fix(tui): Improve connection logic and error handling
+
 ## 1.0.2
 
 ### Patch Changes
