@@ -6,6 +6,10 @@ A Model Context Protocol (MCP) server that provides background process managemen
 
 Some AI agents, like Claude Code, can manage background processes natively, but many others can't. This project provides that capability as a standard tool for other agents like Google's Gemini CLI. It works as a separate service, making long-running task management available to a wider range of agents. I also added a TUI because I wanted to be able to monitor the processes myself.
 
+## Screenshot
+
+<img src="./public/tui-screenshot.png" alt="TUI Screenshot" width="1126">
+
 ## Getting Started
 
 To get started, install the Background Process MCP server in your preferred client.
