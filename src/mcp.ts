@@ -291,7 +291,8 @@ async function main(): Promise<void> {
 
     const shutdown = async (): Promise<void> => {
         await client.killOwnedServer();
-        throw new Error('Shutdown');
+        // eslint-disable-next-line n/no-process-exit
+        process.exit(0);
     };
 
     process.on('SIGINT', shutdown);

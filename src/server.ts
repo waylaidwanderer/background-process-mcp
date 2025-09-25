@@ -10,13 +10,13 @@ async function main(): Promise<void> {
             port: DEFAULT_PORT,
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const server = new WebSocketServer(port);
 
         const handshake = {
             status: 'listening',
             port,
             pid: process.pid,
-            server, // Keep a reference to the server to prevent garbage collection
         };
         process.stdout.write(`${JSON.stringify(handshake)}\n`);
     } catch (err) {

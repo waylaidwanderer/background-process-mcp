@@ -110,8 +110,10 @@ class WebSocketServer {
         this.wss.on('connection', (ws: ExtendedWebSocket) => {
             this.cancelShutdownTimer();
 
+            // eslint-disable-next-line no-param-reassign
             ws.isAlive = true;
             ws.on('pong', () => {
+                // eslint-disable-next-line no-param-reassign
                 ws.isAlive = true;
             });
 
@@ -150,7 +152,7 @@ class WebSocketServer {
     private startShutdownTimer(): void {
         if (this.shutdownTimeout) return;
         this.shutdownTimeout = setTimeout(
-            () => this.shutdown(),
+            async () => this.shutdown(),
             IDLE_SHUTDOWN_TIMEOUT_MS,
         );
     }
@@ -296,8 +298,6 @@ class WebSocketServer {
             this.flushOutputBuffer(processId);
         });
     }
-
-
 
     public broadcast(message: ServerMessage): void {
         const serializedMessage = JSON.stringify(message);
