@@ -1,2 +1,4 @@
-#!/usr/bin/env node
-import("../dist/cli.js");
+#!/bin/sh
+set -e
+DIR=$(dirname "$0")
+node "$DIR/../dist/cli.js" "$@"
