@@ -1,12 +1,16 @@
 {
   "name": "@waylaidwanderer/background-process-mcp",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "",
   "main": "index.js",
   "type": "module",
   "bin": {
     "bgpm": "./bin/bgpm"
   },
+  "files": [
+    "dist",
+    "bin"
+  ],
   "scripts": {
     "test": "vitest",
     "build": "tsc",
