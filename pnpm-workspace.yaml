@@ -1,3 +1,4 @@
 onlyBuiltDependencies:
   - esbuild
   - node-pty
+  - unrs-resolver

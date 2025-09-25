@@ -1,20 +1,23 @@
 {
-  "name": "@waylaidwanderer/bg-mcp",
+  "name": "@waylaidwanderer/background-process-manager",
   "version": "1.0.0",
-  "description": "A robust, decoupled system for managing background shell processes via MCP and a TUI.",
-  "main": "dist/cli.js",
-  "bin": {
-    "bg-mcp": "dist/cli.js"
-  },
+  "description": "",
+  "main": "index.js",
   "type": "module",
+  "bin": {
+    "bgpm": "./bin/bgpm"
+  },
   "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest",
     "build": "tsc",
-    "start:server": "tsx src/server.ts",
-    "start:tui": "tsx src/tui.ts",
-    "start:mcp": "tsx src/mcp.ts",
-    "typecheck": "tsc --noEmit"
+    "start:server": "node dist/server.js",
+    "start:ui": "node dist/cli.js ui --port 31337",
+    "dev:server": "tsc && node dist/server.js",
+    "dev:ui": "tsc && node dist/cli.js ui --port 31337",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm build && changeset publish",
+    "lint": "eslint . --fix"
   },
   "keywords": [],
   "author": "",
@@ -39,13 +42,26 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.7",
+    "@eslint/compat": "^1.4.0",
+    "@eslint/js": "^9.36.0",
+    "@stylistic/eslint-plugin": "^3.1.0",
     "@types/minimist": "^1.2.5",
     "@types/node": "^24.5.2",
     "@types/react": "^19.1.13",
     "@types/uuid": "^11.0.0",
     "@types/ws": "^8.18.1",
+    "@typescript-eslint/parser": "^8.44.1",
+    "eslint": "^9.36.0",
+    "eslint-config-airbnb-extended": "^2.3.1",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import-x": "^4.16.1",
+    "eslint-plugin-n": "^17.23.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
+    "typescript-eslint": "^8.44.1",
     "vitest": "^3.2.4"
   }
 }

@@ -1,6 +1,10 @@
-import { describe, it, expect, vi } from 'vitest';
-import { ProcessManager, ProcessManagerEvents } from '../ProcessManager.js';
-import { ProcessState } from '../../types/index.js';
+import {
+  describe, expect, it, vi,
+} from 'vitest';
+
+import { ProcessManager } from '../ProcessManager.js';
+
+import type { ProcessManagerEvents } from '../ProcessManager.js';
 
 describe('ProcessManager Integration', () => {
   it('should start, receive output from, and stop a real process', async () => {
@@ -17,17 +21,25 @@ describe('ProcessManager Integration', () => {
     const processManager = new ProcessManager(events);
 
     // 1. Start the process
-    const processState = processManager.startProcess('echo "hello integration" && sleep 0.2');
-    
+    const command = 'echo "hello integration" && sleep 0.2';
+    const processState = processManager.startProcess(command);
+
     expect(onProcessStarted).toHaveBeenCalled();
     expect(processState.status).toBe('running');
 
     // 2. Wait for output and stop
-    await new Promise(resolve => setTimeout(resolve, 100)); // Give it time to emit output
+    await new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    }); // Give it time to emit output
 
-    expect(onProcessOutput).toHaveBeenCalledWith(processState.id, expect.stringContaining('hello integration'));
-    
-    await new Promise(resolve => setTimeout(resolve, 200)); // Wait for it to finish
+    expect(onProcessOutput).toHaveBeenCalledWith(
+      processState.id,
+      expect.stringContaining('hello integration'),
+    );
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 200);
+    }); // Wait for it to finish
 
     expect(onProcessStopped).toHaveBeenCalled();
     const stopArgs = onProcessStopped.mock.calls[0];
@@ -46,12 +58,16 @@ describe('ProcessManager Integration', () => {
     const processManager = new ProcessManager(events);
 
     const processState = processManager.startProcess('sleep 10');
-    
-    await new Promise(resolve => setTimeout(resolve, 50)); // Give it time to start
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    }); // Give it time to start
 
     processManager.stopProcess(processState.id);
 
-    await new Promise(resolve => setTimeout(resolve, 100)); // Give it time to stop
+    await new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    }); // Give it time to stop
 
     expect(onProcessStopped).toHaveBeenCalled();
     const stopArgs = onProcessStopped.mock.calls[0];
@@ -71,14 +87,24 @@ describe('ProcessManager Integration', () => {
     const command = 'for i in $(seq 1 5); do echo "line $i"; done';
     const processState = processManager.startProcess(command);
 
-    await new Promise(resolve => setTimeout(resolve, 300)); // Wait for the script to finish
+    await new Promise((resolve) => {
+      setTimeout(resolve, 300);
+    }); // Wait for the script to finish
 
     // Test tail
-    const tailOutput = processManager.getProcessOutput(processState.id, { tail: 3 });
-    expect(tailOutput?.map(l => l.trim())).toEqual(['line 3', 'line 4', 'line 5']);
-    
+    const tailOutput = processManager.getProcessOutput(processState.id, {
+      tail: 3,
+    });
+    expect(tailOutput?.map((l) => l.trim())).toEqual([
+      'line 3',
+      'line 4',
+      'line 5',
+    ]);
+
     // Test head
-    const headOutput = processManager.getProcessOutput(processState.id, { head: 2 });
-    expect(headOutput?.map(l => l.trim())).toEqual(['line 1', 'line 2']);
+    const headOutput = processManager.getProcessOutput(processState.id, {
+      head: 2,
+    });
+    expect(headOutput?.map((l) => l.trim())).toEqual(['line 1', 'line 2']);
   });
 });

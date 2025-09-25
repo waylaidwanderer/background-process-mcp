@@ -1,6 +1,19 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { ProcessManager, ProcessManagerEvents } from '../ProcessManager.js';
-import pty, { IPty } from 'node-pty';
+import pty from 'node-pty';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
+
+import type { IPty } from 'node-pty';
+
+import type {
+  ProcessManager,
+  ProcessManagerEvents,
+} from '../ProcessManager.js';
 
 // Define a mock function variable. This is a robust pattern for mocking.
 const treeKillMock = vi.fn();
@@ -15,7 +28,9 @@ vi.mock('tree-kill', () => ({
 // mechanism is unreliable. vi.spyOn is the correct, surgical tool.
 
 describe('ProcessManager', () => {
-  let ProcessManagerModule: typeof import('../ProcessManager.js');
+  let ProcessManagerModule: {
+    ProcessManager: new (events: ProcessManagerEvents) => ProcessManager;
+  };
   let processManager: ProcessManager;
   let mockPtyProcess: IPty;
   let mockEvents: ProcessManagerEvents;
@@ -63,11 +78,11 @@ describe('ProcessManager', () => {
   });
 
   it('should not start a process if the concurrent limit is reached', () => {
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 20; i += 1) {
       processManager.startProcess(`cmd_${i}`);
     }
     expect(() => processManager.startProcess('one_too_many')).toThrow(
-      'Maximum number of concurrent processes reached.'
+      'Maximum number of concurrent processes reached.',
     );
   });
 
@@ -79,13 +94,15 @@ describe('ProcessManager', () => {
 
   it('should throw an error when trying to stop a non-existent process', () => {
     expect(() => processManager.stopProcess('non-existent-id')).toThrow(
-      'Process not found or not running.'
+      'Process not found or not running.',
     );
   });
 
   it('should clear a stopped process', () => {
     const processState = processManager.startProcess('echo "done"');
-    const onExitCallback = vi.mocked(mockPtyProcess.onExit).mock.calls[0][0];
+    const onExitCallback = vi.mocked(mockPtyProcess.onExit).mock.calls[0][0] as (
+      e: { exitCode: number; signal: number },
+    ) => void;
     onExitCallback({ exitCode: 0, signal: 0 });
     processManager.clearProcess(processState.id);
     expect(processManager.getAllProcesses()).toHaveLength(0);
@@ -94,30 +111,44 @@ describe('ProcessManager', () => {
   it('should throw an error when trying to clear a running process', () => {
     const processState = processManager.startProcess('sleep 10');
     expect(() => processManager.clearProcess(processState.id)).toThrow(
-      'Cannot clear a running process. Stop it first.'
+      'Cannot clear a running process. Stop it first.',
     );
   });
 
   it('should handle process exit with code 0 and emit onProcessStopped event', () => {
     const processState = processManager.startProcess('echo "exit"');
-    const onExitCallback = vi.mocked(mockPtyProcess.onExit).mock.calls[0][0];
+    const onExitCallback = vi.mocked(mockPtyProcess.onExit).mock.calls[0][0] as (
+      e: { exitCode: number; signal: number },
+    ) => void;
     onExitCallback({ exitCode: 0, signal: 0 });
-    expect(mockEvents.onProcessStopped).toHaveBeenCalledWith(processState.id, 0, '0');
+    expect(mockEvents.onProcessStopped).toHaveBeenCalledWith(
+      processState.id,
+      0,
+      '0',
+    );
     expect(processManager.getProcess(processState.id)?.status).toBe('stopped');
   });
 
   it('should handle process exit with non-zero code and set status to "error"', () => {
     const processState = processManager.startProcess('echo "error"');
-    const onExitCallback = vi.mocked(mockPtyProcess.onExit).mock.calls[0][0];
+    const onExitCallback = vi.mocked(mockPtyProcess.onExit).mock.calls[0][0] as (
+      e: { exitCode: number; signal: number },
+    ) => void;
     onExitCallback({ exitCode: 1, signal: 0 });
-    expect(mockEvents.onProcessStopped).toHaveBeenCalledWith(processState.id, 1, '0');
+    expect(mockEvents.onProcessStopped).toHaveBeenCalledWith(
+      processState.id,
+      1,
+      '0',
+    );
     expect(processManager.getProcess(processState.id)?.status).toBe('error');
   });
 
   describe('getProcessOutput', () => {
-    const simulateOutput = (lines: string[]) => {
-      const onDataCallback = vi.mocked(mockPtyProcess.onData).mock.calls[0][0];
-      lines.forEach(line => onDataCallback(line));
+    const simulateOutput = (lines: string[]): void => {
+      const onDataCallback = vi.mocked(mockPtyProcess.onData).mock.calls[0][0] as (
+        data: string,
+      ) => void;
+      lines.forEach((line) => onDataCallback(line));
     };
 
     it('should return the full output, normalizing CRLF line endings', () => {
@@ -130,35 +161,46 @@ describe('ProcessManager', () => {
     it('should return the first N lines for the head option', () => {
       const processState = processManager.startProcess('test');
       simulateOutput(['line1\n', 'line2\n', 'line3\n', 'line4\n', 'line5']);
-      const output = processManager.getProcessOutput(processState.id, { head: 3 });
+      const output = processManager.getProcessOutput(processState.id, {
+        head: 3,
+      });
       expect(output).toEqual(['line1', 'line2', 'line3']);
     });
 
     it('should return the last N lines for the tail option', () => {
       const processState = processManager.startProcess('test');
       simulateOutput(['line1\n', 'line2\n', 'line3\n', 'line4\n', 'line5']);
-      const output = processManager.getProcessOutput(processState.id, { tail: 3 });
+      const output = processManager.getProcessOutput(processState.id, {
+        tail: 3,
+      });
       expect(output).toEqual(['line3', 'line4', 'line5']);
     });
 
     it('should prioritize head over tail when both are provided', () => {
       const processState = processManager.startProcess('test');
       simulateOutput(['line1\n', 'line2\n', 'line3\n', 'line4\n', 'line5']);
-      const output = processManager.getProcessOutput(processState.id, { head: 2, tail: 2 });
+      const output = processManager.getProcessOutput(processState.id, {
+        head: 2,
+        tail: 2,
+      });
       expect(output).toEqual(['line1', 'line2']);
     });
 
     it('should handle head being larger than the number of lines', () => {
       const processState = processManager.startProcess('test');
       simulateOutput(['line1\n', 'line2']);
-      const output = processManager.getProcessOutput(processState.id, { head: 5 });
+      const output = processManager.getProcessOutput(processState.id, {
+        head: 5,
+      });
       expect(output).toEqual(['line1', 'line2']);
     });
 
     it('should handle tail being larger than the number of lines', () => {
       const processState = processManager.startProcess('test');
       simulateOutput(['line1\n', 'line2']);
-      const output = processManager.getProcessOutput(processState.id, { tail: 5 });
+      const output = processManager.getProcessOutput(processState.id, {
+        tail: 5,
+      });
       expect(output).toEqual(['line1', 'line2']);
     });
   });

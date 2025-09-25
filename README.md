@@ -1,100 +1,237 @@
-# @waylaidwanderer/bg-mcp
+# Background Process MCP
 
-This project provides a robust, decoupled system for managing background shell processes. It consists of a headless core service that can be controlled by both an LLM (via an MCP client) and a human user (via a separate TUI client), with all communication happening over a local WebSocket connection.
+A Model Context Protocol (MCP) server that provides background process management capabilities. This server enables LLMs to start, stop, and monitor long-running command-line processes.
 
-## Architecture
+## Motivation
 
-The system is composed of three distinct parts:
-
-1.  **The Core Service:** A standalone, headless Node.js application. This is the brain. It runs the `ProcessManager` and the WebSocket server.
-2.  **The TUI Client:** A separate, runnable Node.js application. This is the user's interactive dashboard. It connects to the Core Service.
-3.  **The MCP Client:** A lightweight Node.js module. This is the LLM's interface. It also connects to the Core Service.
-
-For a detailed breakdown of the architectural principles, see `AGENTS.md`.
-
-## Features
-
--   **Remote Process Management:** Start, stop, and monitor any shell command.
--   **Real-time TUI:** A `blessed`-based terminal interface for live monitoring and manual control.
--   **LLM Integration:** An MCP server with tools for programmatic process management.
--   **Decoupled & Robust:** A server-centric architecture ensures a single source of truth.
--   **Safe & Port-Aware:** Enforces concurrent process limits, guarantees graceful shutdown, and automatically finds and uses an open port.
--   **High-Fidelity Output:** Uses `node-pty` to capture rich terminal output with colors and formatting for the TUI.
+Some AI agents, like Claude Code, can manage background processes natively, but many others can't. This project provides that capability as a standard tool for other agents like Google's Gemini CLI. It works as a separate service, making long-running task management available to a wider range of agents. I also added a TUI because I wanted to be able to monitor the processes myself.
 
 ## Getting Started
 
-### Prerequisites
+To get started, install the Background Process MCP server in your preferred client.
 
--   Node.js (v18+)
--   pnpm (for development)
+**Standard Config**
 
-### Installation
+This configuration works for most MCP clients:
 
-For local development:
-1.  Clone the repository:
-    ```bash
-    git clone <repo-url>
-    cd background-process-mcp
-    ```
-2.  Install dependencies:
-    ```bash
-    pnpm install
-    ```
-3. Build the project:
-    ```bash
-    pnpm build
-    ```
-
-### Usage
-
-The tool is designed to be run directly with `npx` (or `pnpx` after a global link).
-
-#### For Agents / Automated Usage (Recommended)
-
-Simply run the main command. It will automatically handle launching and cleaning up the server process.
-
-```bash
-npx @waylaidwanderer/bg-mcp
+```json
+{
+  "mcpServers": {
+    "backgroundProcess": {
+      "command": "npx",
+      "args": [
+        "@waylaidwanderer/background-process-mcp@latest"
+      ]
+    }
+  }
+}
 ```
 
-This command will:
-1.  Check if a `bg-mcp` server is already running for the current context.
-2.  If not, it will launch one in the background.
-3.  It will then start the MCP server, connected and ready for the agent to use.
-4.  When the MCP process exits, it will automatically terminate the server it launched.
+To connect to a standalone server, add the `--port` argument to the `args` array (e.g., `...mcp@latest", "--port", "31337"]`).
 
-To connect to a specific, pre-existing server, use the `--port` flag:
+<details>
+<summary>Claude Code</summary>
+
+Use the Claude Code CLI to add the Background Process MCP server:
+
 ```bash
-npx @waylaidwanderer/bg-mcp --port 31337
+claude mcp add backgroundProcess npx @waylaidwanderer/background-process-mcp@latest
+```
+</details>
+
+<details>
+<summary>Claude Desktop</summary>
+
+Follow the MCP install [guide](https://modelcontextprotocol.io/quickstart/user), use the standard config above.
+
+</details>
+
+<details>
+<summary>Codex</summary>
+
+Create or edit the configuration file `~/.codex/config.toml` and add:
+
+```toml
+[mcp_servers.backgroundProcess]
+command = "npx"
+args = ["@waylaidwanderer/background-process-mcp@latest"]
 ```
 
-#### For Manual Usage
+For more information, see the [Codex MCP documentation](https://github.com/openai/codex/blob/main/codex-rs/config.md#mcp_servers).
 
-If you want to manage the server and UI manually (e.g., for long-running tasks you want to monitor), use the explicit subcommands.
+</details>
 
-1.  **Start the Core Service (in one terminal):**
-    ```bash
-    npx @waylaidwanderer/bg-mcp server
-    ```
-    The server will start and print a JSON message with the port it's using, e.g., `{"status":"listening","port":31337,...}`.
+<details>
+<summary>Cursor</summary>
 
-2.  **Run the TUI Client (in a separate terminal):**
-    ```bash
-    npx @waylaidwanderer/bg-mcp ui --port 31337
-    ```
-    The terminal dashboard will appear, connected to the server you started.
+#### Click the button to install:
 
+[<img src="https://cursor.com/deeplink/mcp-install-dark.svg" alt="Install in Cursor">](https://cursor.com/en/install-mcp?name=Background%20Process%20MCP&config=eyJjb21tYW5kIjoibnB4IEB3YXlsYWlkd2FuZGVyZXIvYmFja2dyb3VuZC1wcm9jZXNzLW1jcEBsYXRlc3QifQ==)
 
-### Running Tests (for development)
+#### Or install manually:
 
-To run the unit and end-to-end tests:
+Go to `Cursor Settings` -> `MCP` -> `Add new MCP Server`. Name it `backgroundProcess`, use `command` type with the command `npx @waylaidwanderer/background-process-mcp@latest`.
+
+</details>
+
+<details>
+<summary>Gemini CLI</summary>
+
+Follow the MCP install [guide](https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md#configure-the-mcp-server-in-settingsjson), use the standard config above.
+
+</details>
+
+<details>
+<summary>Goose</summary>
+
+#### Click the button to install:
+
+[![Install in Goose](https://block.github.io/goose/img/extension-install-dark.svg)](https://block.github.io/goose/extension?cmd=npx&arg=%40waylaidwanderer%2Fbackground-process-mcp%24latest&id=backgroundProcess&name=Background%20Process%20MCP&description=Manage%20long-running%20command-line%20processes.)
+
+#### Or install manually:
+
+Go to `Advanced settings` -> `Extensions` -> `Add custom extension`. Name it `backgroundProcess`, use type `STDIO`, and set the `command` to `npx @waylaidwanderer/background-process-mcp@latest`. Click "Add Extension".
+</details>
+
+<details>
+<summary>LM Studio</summary>
+
+#### Click the button to install:
+
+[![Add MCP Server backgroundProcess to LM Studio](https://files.lmstudio.ai/deeplink/mcp-install-light.svg)](https://lmstudio.ai/install-mcp?name=backgroundProcess&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyJAd2F5bGFpZHdhbmRlcmVyL2JhY2tncm91bmQtcHJvY2Vzcy1tY3BAbGF0ZXN0Il19)
+
+#### Or install manually:
+
+Go to `Program` in the right sidebar -> `Install` -> `Edit mcp.json`. Use the standard config above.
+</details>
+
+<details>
+<summary>opencode</summary>
+
+Follow the MCP Servers [documentation](https://opencode.ai/docs/mcp-servers/). For example in `~/.config/opencode/opencode.json`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "backgroundProcess": {
+      "type": "local",
+      "command": [
+        "npx",
+        "@waylaidwanderer/background-process-mcp@latest"
+      ],
+      "enabled": true
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary>Qodo Gen</summary>
+
+Open [Qodo Gen](https://docs.qodo.ai/qodo-documentation/qodo-gen) chat panel in VSCode or IntelliJ → Connect more tools → + Add new MCP → Paste the standard config above.
+
+Click `Save`.
+</details>
+
+<details>
+<summary>VS Code (for GitHub Copilot)</summary>
+
+#### Click the button to install:
+
+[<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%7B%22name%22%3A%22backgroundProcess%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22%40waylaidwanderer%2Fbackground-process-mcp%40latest%22%5D%7D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%7B%22name%22%3A%22backgroundProcess%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22%40waylaidwanderer%2Fbackground-process-mcp%40latest%22%5D%7D)
+
+#### Or install manually:
+
+Follow the MCP install [guide](https://code.visualstudio.com/docs/copilot/chat/mcp-servers#_add-an-mcp-server), use the standard config above. You can also install the server using the VS Code CLI:
 
 ```bash
-pnpm test
+# For VS Code
+code --add-mcp '{"name":"backgroundProcess","command":"npx","args":["@waylaidwanderer/background-process-mcp@latest"]}'
+```
+</details>
+
+<details>
+<summary>Windsurf</summary>
+
+Follow Windsurf MCP [documentation](https://docs.windsurf.com/windsurf/cascade/mcp). Use the standard config above.
+
+</details>
+
+## Tools
+
+The following tools are exposed by the MCP server.
+
+<details>
+<summary><b>Process Management</b></summary>
+
+- **start_process**
+  - Description: Starts a new process in the background.
+  - Parameters:
+    - `command` (string): The shell command to execute.
+  - Returns: A confirmation message with the new process ID.
+
+- **stop_process**
+  - Description: Stops a running process.
+  - Parameters:
+    - `processId` (string): The UUID of the process to stop.
+  - Returns: A confirmation message.
+
+- **clear_process**
+  - Description: Clears a stopped process from the list.
+  - Parameters:
+    - `processId` (string): The UUID of the process to clear.
+  - Returns: A confirmation message.
+
+- **get_process_output**
+  - Description: Gets the recent output for a process. Can specify `head` for the first N lines or `tail` for the last N lines.
+  - Parameters:
+    - `processId` (string): The UUID of the process to get output from.
+    - `head` (number, optional): The number of lines to get from the beginning of the output.
+    - `tail` (number, optional): The number of lines to get from the end of the output.
+  - Returns: The requested process output as a single string.
+
+- **list_processes**
+  - Description: Gets a list of all processes being managed by the Core Service.
+  - Parameters: None
+  - Returns: A JSON string representing an array of all process states.
+
+- **get_server_status**
+  - Description: Gets the current status of the Core Service.
+  - Parameters: None
+  - Returns: A JSON string containing server status information (version, port, PID, uptime, process counts).
+
+</details>
+
+## Architecture
+
+The project has three components:
+
+1.  **Core Service (`src/server.ts`)**: A standalone WebSocket server that uses `node-pty` to manage child process lifecycles. It is the single source of truth for all process states. It is designed to be standalone so that other clients beyond the official TUI and MCP can be built for it.
+
+2.  **MCP Client (`src/mcp.ts`)**: Exposes the Core Service functionality as a set of tools for an LLM agent. It can connect to an existing service or spawn a new one.
+
+3.  **TUI Client (`src/tui.ts`)**: An `ink`-based terminal UI that connects to the Core Service to display process information and accept user commands.
+
+## Manual Usage
+
+If you wish to run the server and TUI manually outside of an MCP client, you can use the following commands.
+
+### 1. Run the Core Service
+
+Start the background service manually:
+
+```bash
+npx @waylaidwanderer/background-process-mcp server
 ```
 
-To run the type-checker:
+The server will listen on an available port (defaulting to `31337`) and output a JSON handshake with the connection details.
+
+### 2. Use the TUI
+
+Connect the TUI to a running server via its port:
 
 ```bash
-pnpm typecheck
+npx @waylaidwanderer/background-process-mcp ui --port <port_number>
 ```
