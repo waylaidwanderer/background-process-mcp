@@ -218,12 +218,24 @@ The project has three components:
 
 If you wish to run the server and TUI manually outside of an MCP client, you can use the following commands.
 
+For a shorter command, you can install the package globally:
+
+```bash
+pnpm add -g @waylaidwanderer/background-process-mcp
+```
+
+This will give you access to the `bgpm` command.
+
 ### 1. Run the Core Service
 
 Start the background service manually:
 
 ```bash
+# With npx
 npx @waylaidwanderer/background-process-mcp server
+
+# Or, if installed globally
+bgpm server
 ```
 
 The server will listen on an available port (defaulting to `31337`) and output a JSON handshake with the connection details.
@@ -233,5 +245,9 @@ The server will listen on an available port (defaulting to `31337`) and output a
 Connect the TUI to a running server via its port:
 
 ```bash
+# With npx
 npx @waylaidwanderer/background-process-mcp ui --port <port_number>
+
+# Or, if installed globally
+bgpm ui --port <port_number>
 ```
