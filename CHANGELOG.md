@@ -1,5 +1,17 @@
 # @waylaidwanderer/background-process-mcp
 
+## 1.1.0
+
+### Minor Changes
+
+- e154391: ### New Features
+
+  - Added a `run_command_sync` tool to the MCP. This allows an agent to execute a shell command and wait for it to complete, receiving the full output synchronously. This is ideal for short-running tasks where the output is expected immediately.
+
+### Patch Changes
+
+- b2667ba: fix(lint): Resolve various linting errors and improve shutdown process.
+
 ## 1.0.3
 
 ### Patch Changes
