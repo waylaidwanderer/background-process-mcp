@@ -32,7 +32,7 @@ async function getPackageInfo(): Promise<{ name: string; version: string }> {
 }
 
 class CoreServiceClient {
-    private ws: WebSocket;
+    public ws: WebSocket;
 
     private pendingRequests = new Map<
         string,
@@ -286,6 +286,61 @@ async function main(): Promise<void> {
                 };
             }
             throw new Error('Unexpected response from server');
+        },
+    });
+
+    mcpServer.addTool({
+        name: 'run_command_sync',
+        description: 'Runs a command synchronously and returns its full output.',
+        parameters: z.object({
+            command: z.string(),
+        }),
+        execute: async ({ command }) => {
+            const startResult = await client.sendRequest({
+                action: 'client.start_process',
+                requestId: uuidv4(),
+                command,
+            });
+
+            if (
+                startResult.action !== 'server.request_response'
+                || !startResult.success
+                || !startResult.data
+            ) {
+                throw new Error('Failed to start process');
+            }
+            const processId = (startResult.data as { id: string }).id;
+
+            return new Promise((resolve) => {
+                let output = '';
+
+                const messageHandler = (data: WebSocket.RawData): void => {
+                    try {
+                        const message = ServerMessageSchema.parse(
+                            JSON.parse(data.toString()),
+                        );
+
+                        if (
+                            message.action === 'server.process_output'
+                            && message.processId === processId
+                        ) {
+                            output += message.cleanOutput;
+                        }
+
+                        if (
+                            message.action === 'server.process_stopped'
+                            && message.process.id === processId
+                        ) {
+                            client.ws.removeListener('message', messageHandler);
+                            resolve(output.trim());
+                        }
+                    } catch {
+                        // Ignore parse errors
+                    }
+                };
+
+                client.ws.on('message', messageHandler);
+            });
         },
     });
 
