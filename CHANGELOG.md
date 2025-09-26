@@ -1,5 +1,11 @@
 # @waylaidwanderer/background-process-mcp
 
+## 1.1.2
+
+### Patch Changes
+
+- Fix(ci): Enforce LF line endings for bin/bgpm via .gitattributes to ensure cross-platform compatibility.
+
 ## 1.1.1
 
 ### Patch Changes
