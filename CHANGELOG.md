@@ -1,5 +1,11 @@
 # @waylaidwanderer/background-process-mcp
 
+## 1.1.1
+
+### Patch Changes
+
+- Fix(bin): Correct npx execution regression
+
 ## 1.1.0
 
 ### Minor Changes
