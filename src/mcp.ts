@@ -169,7 +169,7 @@ async function main(): Promise<void> {
 
     mcpServer.addTool({
         name: 'start_process',
-        description: 'Starts a new process in the background.',
+        description: 'Starts a new process in the background. Use this for long-running commands such as servers or watchers.',
         parameters: z.object({ command: z.string() }),
         execute: async ({ command }) => {
             const result = await client.sendRequest({
@@ -185,7 +185,7 @@ async function main(): Promise<void> {
     });
     mcpServer.addTool({
         name: 'stop_process',
-        description: 'Stops a running process.',
+        description: 'Stops a running background process.',
         parameters: z.object({ processId: z.string().uuid() }),
         execute: async ({ processId }) => {
             await client.sendRequest({
@@ -198,7 +198,7 @@ async function main(): Promise<void> {
     });
     mcpServer.addTool({
         name: 'clear_process',
-        description: 'Clears a stopped process from the list.',
+        description: 'Clears a stopped background process from the list.',
         parameters: z.object({ processId: z.string().uuid() }),
         execute: async ({ processId }) => {
             await client.sendRequest({
@@ -212,7 +212,7 @@ async function main(): Promise<void> {
     mcpServer.addTool({
         name: 'get_process_output',
         description:
-      'Gets the recent output for a process. Can specify `head` or `tail`.',
+            'Gets the recent output for a background process. Can specify `head` or `tail`.',
         parameters: z
             .object({
                 processId: z.string().uuid(),
@@ -242,7 +242,7 @@ async function main(): Promise<void> {
 
     mcpServer.addTool({
         name: 'get_server_status',
-        description: 'Gets the current status of the Core Service.',
+        description: 'Gets the current status of the Background Process Manager server.',
         parameters: z.object({}),
         execute: async () => {
             const result = await client.sendRequest({
@@ -268,7 +268,7 @@ async function main(): Promise<void> {
     mcpServer.addTool({
         name: 'list_processes',
         description:
-      'Gets a list of all processes being managed by the Core Service.',
+            'Gets a list of all processes being managed by the Background Process Manager.',
         parameters: z.object({}),
         execute: async () => {
             const result = await client.sendRequest({
@@ -291,7 +291,7 @@ async function main(): Promise<void> {
 
     mcpServer.addTool({
         name: 'run_command_sync',
-        description: 'Runs a command synchronously and returns its full output.',
+        description: 'Runs a shell command synchronously and returns its full output. Use this for short-lived commands such as builds or tests.',
         parameters: z.object({
             command: z.string(),
         }),
