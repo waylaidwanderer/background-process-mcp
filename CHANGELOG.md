@@ -1,5 +1,11 @@
 # @waylaidwanderer/background-process-mcp
 
+## 1.2.12
+
+### Fixed
+
+-   **macOS Packaging:** The archive build now forces the appropriate `-std=gnu++17/20` flag when rebuilding `node-pty`, so macOS arm64 runners can generate Node 20/22/24 prebuilts without `std::optional`/`is_*` template errors.
+
 ## 1.2.11
 
 ### Fixed
