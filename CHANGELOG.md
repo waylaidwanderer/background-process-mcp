@@ -1,5 +1,11 @@
 # @waylaidwanderer/background-process-mcp
 
+## 1.2.13
+
+### Fixed
+
+-   **macOS Packaging (again):** Export `CXXFLAGS` alongside `npm_config_cxxflags` so node-gyp actually uses the requested C++17/C++20 standard while rebuilding `node-pty` on macOS runners.
+
 ## 1.2.12
 
 ### Fixed
