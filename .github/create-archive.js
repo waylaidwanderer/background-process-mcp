@@ -141,6 +141,7 @@ async function rebuildNodePty(targetVersion) {
   const cxxFlag = getCxxFlag(targetVersion ?? process.versions.node);
   if (cxxFlag) {
     env.npm_config_cxxflags = cxxFlag;
+    env.CXXFLAGS = cxxFlag;
   }
   await runCommand(pnpmCommand, ['rebuild', 'node-pty'], { env });
 }
