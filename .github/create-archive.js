@@ -113,6 +113,23 @@ function runCommand(command, cmdArgs, { env } = {}) {
   });
 }
 
+function getCxxFlag(version) {
+  if (!version) {
+    return undefined;
+  }
+  const major = Number(version.split('.')[0]);
+  if (Number.isNaN(major)) {
+    return undefined;
+  }
+  if (major >= 24) {
+    return '-std=gnu++20';
+  }
+  if (major >= 20) {
+    return '-std=gnu++17';
+  }
+  return undefined;
+}
+
 async function rebuildNodePty(targetVersion) {
   const env = targetVersion
     ? {
@@ -120,7 +137,11 @@ async function rebuildNodePty(targetVersion) {
       npm_config_disturl: 'https://nodejs.org/download/release',
       npm_config_runtime: 'node',
     }
-    : undefined;
+    : {};
+  const cxxFlag = getCxxFlag(targetVersion ?? process.versions.node);
+  if (cxxFlag) {
+    env.npm_config_cxxflags = cxxFlag;
+  }
   await runCommand(pnpmCommand, ['rebuild', 'node-pty'], { env });
 }
 
