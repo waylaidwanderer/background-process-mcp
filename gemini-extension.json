@@ -1,0 +1,14 @@
+{
+  "name": "@waylaidwanderer/background-process-mcp",
+  "version": "1.2.2",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "nodeServer": {
+      "command": "node",
+      "args": [
+        "${extensionPath}${/}dist${/}mcp.js"
+      ],
+      "cwd": "${extensionPath}"
+    }
+  }
+}
