@@ -1,5 +1,13 @@
 # @waylaidwanderer/background-process-mcp
 
+## 1.2.3
+
+### Added
+
+-   **Gemini Extension Support:** The project can now be installed and used as a Gemini CLI extension.
+-   **Automated GitHub Releases:** Added a GitHub Actions workflow to automatically build and release platform-specific assets for Linux (x64) and macOS (arm64) whenever a new version tag is pushed.
+-   **Extension Context:** Included a `GEMINI.md` file to provide the model with a clear usage strategy for the available tools.
+
 ## 1.2.0
 
 ### Minor Changes
