@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
-const { spawnSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { spawnSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // The script is in /bin, so the project root is one level up.
 const projectRoot = path.resolve(__dirname, '..');
 const distPath = path.join(projectRoot, 'dist');
+const cliPath = path.join(distPath, 'cli.js');
 
 // If the 'dist' directory doesn't exist, it means we're likely in a git-cloned
 // environment. We need to build the project first.
@@ -46,6 +51,4 @@ if (!fs.existsSync(distPath)) {
 }
 
 // Now that we're sure the project is built, run the actual CLI.
-// We can't use a dynamic import() here because this script needs to be CommonJS
-// compatible to use require('child_process') etc. without causing module issues.
-require(path.join(distPath, 'cli.js'));
+import(cliPath);

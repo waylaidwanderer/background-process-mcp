@@ -1,5 +1,11 @@
 # @waylaidwanderer/background-process-mcp
 
+## 1.2.7
+
+### Fixed
+
+-   **ESM Compatibility:** The `bin/bgpm` script has been rewritten to use ES Module syntax (`import`) instead of CommonJS (`require`). This fixes a crash on launch caused by the project's `"type": "module"` setting in `package.json`.
+
 ## 1.2.6
 
 ### Changed
