@@ -1,6 +1,6 @@
 {
   "name": "background-process",
-  "version": "1.2.10",
+  "version": "1.2.11",
   "contextFileName": "GEMINI.md",
   "mcpServers": {
     "background-process": {

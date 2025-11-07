@@ -1,5 +1,11 @@
 # @waylaidwanderer/background-process-mcp
 
+## 1.2.11
+
+### Fixed
+
+-   **Build Stability:** Added explicit typing for the `node-pty` `onExit` handler so `tsc` passes on macOS/Node 20 builds (CI no longer fails on `pnpm build`).
+
 ## 1.2.10
 
 ### Changed
