@@ -1,5 +1,11 @@
 # @waylaidwanderer/background-process-mcp
 
+## 1.2.6
+
+### Changed
+
+-   **Self-Bootstrapping Installation:** The extension's entry script (`bin/bgpm`) now automatically detects if the project has been built. If the `dist` folder is missing (as in a git clone), it will run `pnpm install` and `pnpm build` to compile itself, making git-based installations much more robust.
+
 ## 1.2.5
 
 ### Fixed

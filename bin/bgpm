@@ -1,10 +1,51 @@
 #!/usr/bin/env node
-import { fileURLToPath } from 'url';
-import path from 'path';
+/* eslint-disable no-console */
+const { spawnSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// The script is in /bin, so the project root is one level up.
+const projectRoot = path.resolve(__dirname, '..');
+const distPath = path.join(projectRoot, 'dist');
 
-const cliPath = path.resolve(__dirname, '../dist/cli.js');
+// If the 'dist' directory doesn't exist, it means we're likely in a git-cloned
+// environment. We need to build the project first.
+if (!fs.existsSync(distPath)) {
+    console.log('--- Background Process Extension ---');
+    console.log('First-time setup: compiling TypeScript...');
 
-import(cliPath);
+    // 1. Install dependencies
+    console.log('Running `pnpm install`...');
+    const install = spawnSync('pnpm', ['install'], {
+        cwd: projectRoot,
+        stdio: 'inherit',
+        shell: true,
+    });
+
+    if (install.error || install.status !== 0) {
+        console.error('Error: Failed to install dependencies.');
+        console.error('Please ensure pnpm is installed and try again.');
+        process.exit(1);
+    }
+
+    // 2. Build the project
+    console.log('Running `pnpm build`...');
+    const build = spawnSync('pnpm', ['build'], {
+        cwd: projectRoot,
+        stdio: 'inherit',
+        shell: true,
+    });
+
+    if (build.error || build.status !== 0) {
+        console.error('Error: Failed to build the project.');
+        process.exit(1);
+    }
+
+    console.log('Build complete. Starting extension...');
+    console.log('------------------------------------');
+}
+
+// Now that we're sure the project is built, run the actual CLI.
+// We can't use a dynamic import() here because this script needs to be CommonJS
+// compatible to use require('child_process') etc. without causing module issues.
+require(path.join(distPath, 'cli.js'));
