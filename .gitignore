@@ -3,6 +3,7 @@
 
 # Build output
 /dist
+/release
 
 # Local plans
 /plans

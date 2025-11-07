@@ -1,12 +1,9 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import stripAnsi from 'strip-ansi';
 import { WebSocketServer as Server } from 'ws';
 
 import { ProcessManager } from './ProcessManager.js';
 import { ClientMessageSchema } from '../types/index.js';
+import { getPackageInfo } from '../utils/packageInfo.js';
 
 import type { RawData, WebSocket } from 'ws';
 
@@ -88,19 +85,8 @@ class WebSocketServer {
 
     private async loadPackageVersion(): Promise<void> {
         try {
-            const currentFilename = fileURLToPath(import.meta.url);
-            const currentDirname = path.dirname(currentFilename);
-            const packageJsonPath = path.join(
-                currentDirname,
-                '..',
-                '..',
-                'package.json',
-            );
-            const packageJsonContent = await fs.readFile(packageJsonPath, 'utf-8');
-            const packageJson = JSON.parse(packageJsonContent) as {
-                version?: string;
-            };
-            this.packageVersion = packageJson.version ?? 'unknown';
+            const packageInfo = await getPackageInfo();
+            this.packageVersion = packageInfo.version ?? 'unknown';
         } catch {
             // Gracefully fail, version will remain 'unknown'
         }

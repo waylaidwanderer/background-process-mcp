@@ -1,6 +1,5 @@
 import { spawn } from 'node:child_process';
-import fs from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { FastMCP } from 'fastmcp';
@@ -11,25 +10,19 @@ import WebSocket from 'ws';
 import { z } from 'zod';
 
 import { ServerMessageSchema } from './types/index.js';
+import { getPackageInfo } from './utils/packageInfo.js';
 
 import type { ChildProcess } from 'node:child_process';
 
 import type { ClientMessage, ServerMessage } from './types/index.js';
 
 // This ensures we can find the cli.js file regardless of where the command is run from.
-const currentFilename = fileURLToPath(import.meta.url);
-const currentDirname = dirname(currentFilename);
-const cliPath = join(currentDirname, 'cli.js');
-
-async function getPackageInfo(): Promise<{ name: string; version: string }> {
-    const packageJsonPath = join(currentDirname, '..', 'package.json');
-    const packageJsonContent = await fs.readFile(packageJsonPath, 'utf-8');
-    const packageJson = JSON.parse(packageJsonContent) as {
-        name: string;
-        version: string;
-    };
-    return { name: packageJson.name, version: packageJson.version };
-}
+const cliPath = (() => {
+    if (process.argv[1]) {
+        return path.resolve(process.argv[1]);
+    }
+    return fileURLToPath(new URL('./cli.js', import.meta.url));
+})();
 
 class CoreServiceClient {
     public ws: WebSocket;
@@ -169,7 +162,7 @@ async function main(): Promise<void> {
 
     mcpServer.addTool({
         name: 'start_process',
-        description: 'Starts a new process in the background. Use this for long-running commands such as servers or watchers.',
+        description: 'Starts a new background process (servers, watchers, etc.).',
         parameters: z.object({ command: z.string() }),
         execute: async ({ command }) => {
             const result = await client.sendRequest({
@@ -291,7 +284,7 @@ async function main(): Promise<void> {
 
     mcpServer.addTool({
         name: 'run_command_sync',
-        description: 'Runs a shell command synchronously and returns its full output. Use this for short-lived commands such as builds or tests.',
+        description: 'Runs a short-lived shell command synchronously and returns full output.',
         parameters: z.object({
             command: z.string(),
         }),
