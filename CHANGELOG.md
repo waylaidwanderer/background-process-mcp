@@ -1,5 +1,11 @@
 # @waylaidwanderer/background-process-mcp
 
+## 1.2.4
+
+### Fixed
+
+-   **Gemini Extension Command:** Corrected the `mcpServers` configuration in `gemini-extension.json` to use the proper `bin/bgpm` entry point instead of directly calling the script. This ensures the extension starts up in the same robust manner as it would from the command line.
+
 ## 1.2.3
 
 ### Added

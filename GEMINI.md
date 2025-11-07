@@ -1,4 +1,4 @@
-# Background Process MCP Extension
+# Background Process Manager Extension
 
 This extension provides a robust set of tools for managing background processes. It is your primary interface for any long-running or interactive tasks.
 
