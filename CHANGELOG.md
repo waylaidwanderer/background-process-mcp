@@ -1,5 +1,11 @@
 # @waylaidwanderer/background-process-mcp
 
+## 1.2.5
+
+### Fixed
+
+-   **Extension Installation:** Corrected the release asset naming convention to use the name from `gemini-extension.json` (`background-process`) instead of `package.json`. This allows the Gemini CLI to correctly find and download the pre-built archives instead of falling back to a git clone.
+
 ## 1.2.4
 
 ### Fixed

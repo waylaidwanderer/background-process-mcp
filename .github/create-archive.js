@@ -11,9 +11,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.join(__dirname, '..');
 
-const packageJsonPath = path.join(projectRoot, 'package.json');
-const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-const extensionName = packageJson.name.split('/').pop(); 
+const extensionJsonPath = path.join(projectRoot, 'gemini-extension.json');
+const extensionJson = JSON.parse(fs.readFileSync(extensionJsonPath, 'utf-8'));
+const extensionName = extensionJson.name; 
 
 const rawArgs = process.argv.slice(2);
 const args = minimist(rawArgs[0] === '--' ? rawArgs.slice(1) : rawArgs);
