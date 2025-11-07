@@ -45,6 +45,7 @@ async function createPackage() {
     const filesToCopy = [
         'dist',
         'bin',
+        'node_modules',
         'gemini-extension.json',
         'GEMINI.md',
         'package.json',
@@ -57,9 +58,6 @@ async function createPackage() {
             copyFiles(src, dest);
         }
     });
-
-    console.log('Installing production dependencies...');
-    execSync('pnpm install --prod', { cwd: packageDir, stdio: 'inherit' });
 
     const archiveName = `${platform}.${arch}.${extensionName}`;
     const archivePath = path.join(releaseDir, archiveName);

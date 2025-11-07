@@ -1,5 +1,11 @@
 # @waylaidwanderer/background-process-mcp
 
+## 1.2.8
+
+### Fixed
+
+-   **Release Archives:** The packaging script now correctly copies the root `node_modules` directory into the release archive. This fixes a critical bug where the pre-built extension was missing all its dependencies, including the native `node-pty` module.
+
 ## 1.2.7
 
 ### Fixed

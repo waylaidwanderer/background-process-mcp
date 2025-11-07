@@ -8,19 +8,14 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// The script is in /bin, so the project root is one level up.
 const projectRoot = path.resolve(__dirname, '..');
 const distPath = path.join(projectRoot, 'dist');
 const cliPath = path.join(distPath, 'cli.js');
 
-// If the 'dist' directory doesn't exist, it means we're likely in a git-cloned
-// environment. We need to build the project first.
 if (!fs.existsSync(distPath)) {
     console.log('--- Background Process Extension ---');
     console.log('First-time setup: compiling TypeScript...');
 
-    // 1. Install dependencies
-    console.log('Running `pnpm install`...');
     const install = spawnSync('pnpm', ['install'], {
         cwd: projectRoot,
         stdio: 'inherit',
@@ -33,8 +28,6 @@ if (!fs.existsSync(distPath)) {
         process.exit(1);
     }
 
-    // 2. Build the project
-    console.log('Running `pnpm build`...');
     const build = spawnSync('pnpm', ['build'], {
         cwd: projectRoot,
         stdio: 'inherit',
@@ -50,5 +43,17 @@ if (!fs.existsSync(distPath)) {
     console.log('------------------------------------');
 }
 
-// Now that we're sure the project is built, run the actual CLI.
-import(cliPath);
+// After bootstrapping, spawn a new Node process to run the actual CLI.
+// This ensures it starts with a clean state and can see the new node_modules.
+const args = process.argv.slice(2);
+const result = spawnSync('node', [cliPath, ...args], {
+    cwd: projectRoot,
+    stdio: 'inherit',
+});
+
+// Exit with the same code as the child process.
+if (result.error) {
+    console.error('Failed to start the CLI.', result.error);
+    process.exit(1);
+}
+process.exit(result.status ?? 0);
