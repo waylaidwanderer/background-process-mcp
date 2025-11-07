@@ -93,3 +93,7 @@ Pushing the new tag will trigger the `release.yml` GitHub Action, which will:
 4.  Attach the compiled, platform-specific `.tar.gz` archives to the GitHub Release as assets.
 
 Once the action is complete, the new version is fully released.
+
+## 4. Operational Notes
+
+- Plans in the `plans/` workspace are working artifacts only. Do **not** commit them or reference plan IDs in commit messages; keep them local unless the repository policy changes.
