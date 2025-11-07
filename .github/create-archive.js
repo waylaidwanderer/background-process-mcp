@@ -1,5 +1,6 @@
 /* eslint-disable import-x/no-extraneous-dependencies, no-underscore-dangle, no-console */
 
+import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import fsPromises from 'node:fs/promises';
 import { createRequire } from 'node:module';
@@ -9,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import archiver from 'archiver';
 import { build } from 'esbuild';
 import minimist from 'minimist';
+import { getAbi } from 'node-abi';
 
 const require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
@@ -34,6 +36,15 @@ const arch = args.arch || process.arch;
 const releaseDir = path.join(projectRoot, 'release');
 const packageDir = path.join(releaseDir, 'package');
 const outputFile = path.join(packageDir, 'cli.js');
+const pnpmCommand = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
+const defaultNodeTargets = process.env.BGPM_NODE_TARGETS
+  ? process.env.BGPM_NODE_TARGETS.split(',')
+  : ['20.18.0', '22.11.0', '24.3.0'];
+const nodeTargets = Array.from(new Set(
+  defaultNodeTargets
+    .map((version) => version.trim())
+    .filter(Boolean),
+));
 
 async function ensureCleanOutput() {
   try {
@@ -83,6 +94,67 @@ async function copyDirectory(source, destination) {
   );
 }
 
+function runCommand(command, cmdArgs, { env } = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, cmdArgs, {
+      cwd: projectRoot,
+      stdio: 'inherit',
+      shell: process.platform === 'win32',
+      env: env ? { ...process.env, ...env } : process.env,
+    });
+    child.on('exit', (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`${command} ${cmdArgs.join(' ')} exited with code ${code}`));
+      }
+    });
+    child.on('error', reject);
+  });
+}
+
+async function rebuildNodePty(targetVersion) {
+  const env = targetVersion
+    ? {
+      npm_config_target: targetVersion,
+      npm_config_disturl: 'https://nodejs.org/download/release',
+      npm_config_runtime: 'node',
+    }
+    : undefined;
+  await runCommand(pnpmCommand, ['rebuild', 'node-pty'], { env });
+}
+
+async function buildNodePtyPrebuilts(sourceRoot, destinationRoot) {
+  if (nodeTargets.length === 0) {
+    return;
+  }
+  const prebuiltRoot = path.join(destinationRoot, 'prebuilt');
+  await fsPromises.mkdir(prebuiltRoot, { recursive: true });
+  const originalNodeVersion = process.versions.node;
+  /* eslint-disable no-await-in-loop */
+  for (let index = 0; index < nodeTargets.length; index += 1) {
+    const targetVersion = nodeTargets[index];
+    let buildSucceeded = true;
+    try {
+      await rebuildNodePty(targetVersion);
+    } catch (error) {
+      console.warn(
+        `Warning: failed to rebuild node-pty for Node ${targetVersion}:`,
+        error,
+      );
+      buildSucceeded = false;
+    }
+    if (buildSucceeded) {
+      const abi = getAbi(targetVersion, 'node');
+      const destDir = path.join(prebuiltRoot, `node-v${abi}`);
+      await fsPromises.rm(destDir, { recursive: true, force: true });
+      await copyDirectory(path.join(sourceRoot, 'build'), destDir);
+    }
+  }
+  /* eslint-enable no-await-in-loop */
+  await rebuildNodePty(originalNodeVersion);
+}
+
 async function copyNodePtyModule() {
   const nodePtySource = path.dirname(require.resolve('node-pty/package.json', {
     paths: [projectRoot],
@@ -98,6 +170,8 @@ async function copyNodePtyModule() {
     }
   }
   await copyDirectory(nodePtySource, nodePtyDestination);
+  await fsPromises.rm(path.join(nodePtyDestination, 'build'), { recursive: true, force: true });
+  await buildNodePtyPrebuilts(nodePtySource, nodePtyDestination);
 }
 
 async function bundleCli() {

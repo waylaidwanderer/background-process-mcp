@@ -1,12 +1,18 @@
+import { createRequire } from 'node:module';
 import os from 'node:os';
 
-import pty from 'node-pty';
 import treeKill from 'tree-kill';
 import { v4 as uuidv4 } from 'uuid';
+
+import ensureNodePtyBinary from '../utils/ensureNodePtyBinary.js';
 
 import type { IPty } from 'node-pty';
 
 import type { ProcessState } from '../types/index.js';
+
+const require = createRequire(import.meta.url);
+ensureNodePtyBinary();
+const pty = require('node-pty');
 
 const MAX_CONCURRENT_PROCESSES = 20;
 const MAX_HISTORY_LINES_PER_PROCESS = 2000;

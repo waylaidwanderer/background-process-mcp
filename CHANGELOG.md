@@ -4,7 +4,9 @@
 
 ### Changed
 
--   **Archive Creation:** `.github/create-archive.js` now bundles the CLI with esbuild, injects package metadata, and copies the platform's `node-pty` build into the release output. Each platform can run the generated `release/package/cli.js` without reinstalling dependencies, and the GitHub release workflow produces ready-to-run archives per OS/architecture.
+-   **Archive Creation:** `.github/create-archive.js` now bundles the CLI with esbuild, injects package metadata, and builds a `node-pty` prebuilt matrix for Node 20/22/24 so the shipped `cli.js` works across Node versions without rebuilding native modules. The packaging step also copies the module's prebuilt binaries into `node_modules/node-pty/prebuilt/node-v<abi>`.
+-   **runtime bootstrap:** The Core Service proactively installs the right `node-pty` binary at startup, so switching Node versions no longer breaks existing release archives.
+-   **Gemini CLI:** `gemini-extension.json` now points directly at the bundled `cli.js`, matching the structure produced in release archives.
 
 ## 1.2.8
 

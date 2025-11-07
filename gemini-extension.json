@@ -6,7 +6,7 @@
     "background-process": {
       "command": "node",
       "args": [
-        "${extensionPath}${/}bin${/}bgpm"
+        "${extensionPath}${/}cli.js"
       ],
       "cwd": "${extensionPath}"
     }

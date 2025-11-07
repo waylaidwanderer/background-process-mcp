@@ -108,6 +108,9 @@ importers:
       eslint-plugin-react-hooks:
         specifier: ^5.2.0
         version: 5.2.0(eslint@9.36.0)
+      node-abi:
+        specifier: ^4.17.0
+        version: 4.17.0
       tsx:
         specifier: ^4.20.5
         version: 4.20.5
@@ -2073,6 +2076,10 @@ packages:
   negotiator@1.0.0:
     resolution: {integrity: sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg==}
     engines: {node: '>= 0.6'}
+
+  node-abi@4.17.0:
+    resolution: {integrity: sha512-ljZ7PiChMA2O3sGPX5/bpBhW0O9rXn+orb2xo3Z0vleSlil7G65WZjSFjmIeAtHZHa2GXiTOMdFCsiyImMEIMg==}
+    engines: {node: '>=22.12.0'}
 
   node-pty@1.0.0:
     resolution: {integrity: sha512-wtBMWWS7dFZm/VgqElrTvtfMq4GzJ6+edFI0Y0zyzygUSZMgZdraDUMUhCIvkjhJjme15qWmbyJbtAx4ot4uZA==}
@@ -5055,6 +5062,10 @@ snapshots:
   natural-compare@1.4.0: {}
 
   negotiator@1.0.0: {}
+
+  node-abi@4.17.0:
+    dependencies:
+      semver: 7.7.2
 
   node-pty@1.0.0:
     dependencies:
