@@ -137,7 +137,13 @@ export class ProcessManager {
             this.events.onProcessOutput(id, cleanedData);
         });
 
-        ptyProcess.onExit(({ exitCode, signal }) => {
+        ptyProcess.onExit(({
+            exitCode,
+            signal,
+        }: {
+            exitCode: number | null;
+            signal?: number | string;
+        }) => {
             const processInfo = this.processes.get(id);
             if (processInfo) {
                 processInfo.state.status = exitCode === 0 ? 'stopped' : 'error';
